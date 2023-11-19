@@ -9,6 +9,8 @@ import time
 import uuid
 from io import BytesIO
 from pathlib import Path
+from flask import Flask
+from flask.templating import render_template
 
 import numpy as np
 import pandas as pd
@@ -23,24 +25,22 @@ from svgpathtools import parse_path
 # """)
 # app = MultiApp()
 
+app = Flask(__name__, static_url_path='/static')
+
+@app.route('/')
+def index():
+    return render_template('index.html', name='home')
+
 def main():
     if "button_id" not in st.session_state:
         st.session_state["button_id"] = ""
     if "color_to_label" not in st.session_state:
         st.session_state["color_to_label"] = {}
     PAGES = {
-        "Draw away!": full_app,
+        "Images": full_app,
     }
     page = st.sidebar.selectbox("Page:", options=list(PAGES.keys()))
     PAGES[page]()
-
-    with st.sidebar:
-        st.markdown("---")
-        st.markdown(
-            '<h6>Made with love <3</h6>',
-            unsafe_allow_html=True,
-        )
-
 
 def full_app():
     st.sidebar.header("Configuration")
@@ -57,7 +57,7 @@ def full_app():
     # Specify canvas parameters in application
     drawing_mode = st.sidebar.selectbox(
         "Drawing tool:",
-        ("freedraw", "line", "rect", "circle", "transform", "polygon", "point"),
+        ("freedraw", "line", "rectangle", "circle", "transformation", "polygon", "point"),
     )
     stroke_width = st.sidebar.slider("Stroke width: ", 1, 25, 3)
     if drawing_mode == "point":
@@ -93,6 +93,7 @@ def full_app():
 
 
 if __name__ == "__main__":
+    # app.run(debug=True)
     st.set_page_config(
         page_title="Streamlit Drawable Canvas", page_icon=":pencil2:"
     )
