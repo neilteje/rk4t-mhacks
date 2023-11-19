@@ -23,7 +23,7 @@ def create_top_nav(selected_page):
 
 def main():
     # Top navigation bar
-    st.set_page_config(page_title="Streamlit Drawable Canvas", page_icon=":pencil2:")
+    #st.set_page_config(page_title="Streamlit Drawable Canvas", page_icon=":pencil2:")
 
     # Use session state to store the current page
     if 'page' not in st.session_state:

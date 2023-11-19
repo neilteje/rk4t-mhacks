@@ -3,7 +3,7 @@ import streamlit_authenticator as stauth
 import yaml
 from yaml.loader import SafeLoader
 
-st.set_page_config(page_title="Please Login", layout="centered", initial_sidebar_state="collapsed")
+#st.set_page_config(page_title="Please Login", layout="centered", initial_sidebar_state="collapsed")
 st.write("# Welcome!")
 
 # Display the background image

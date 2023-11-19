@@ -8,8 +8,8 @@ from svgpathtools import parse_path
 from landing import show_landing_page
 import streamlit_authenticator as stauth
 import yaml
-from yaml.loader import SafeLoader
-
+from yaml.loader import SafeLoader    
+st.set_page_config(page_title="Streamlit Drawable Canvas", page_icon=":pencil2:")
 def showLanding():
     page_bg_img = '''
     <style>
@@ -194,7 +194,7 @@ def navbar():
     col1, col2, col3, col4, col5 = st.columns([4, 1, 1, 1, 1])
     with col1:
         st.markdown("""
-            <h1 style='font-size: 36px; font-weight: bold;'>MPaint</h1>
+            <h1 style='font-size: 36px; font-weight: bold;'>MPaint 🎨</h1>
             """, unsafe_allow_html=True)
     with col2:
         if st.button('Home'):
@@ -237,5 +237,4 @@ def main():
     # PAGES[page]()
 
 if __name__ == "__main__":
-    st.set_page_config(page_title="Streamlit Drawable Canvas", page_icon=":pencil2:")
     main()
