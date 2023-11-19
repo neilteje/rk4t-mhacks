@@ -6,8 +6,9 @@ from PIL import Image
 from streamlit_drawable_canvas import st_canvas
 from svgpathtools import parse_path
 from landing import show_landing_page
-
-st.set_page_config(page_title="Streamlit Drawable Canvas", page_icon=":pencil2:")
+import streamlit_authenticator as stauth
+import yaml
+from yaml.loader import SafeLoader
 
 def showLanding():
     page_bg_img = '''
@@ -83,14 +84,149 @@ def full_app():
             objects[col] = objects[col].astype("str")
         st.dataframe(objects)
 
+def logging():
+    st.write("# Welcome!")
+
+    # Optionally, set a background image
+    def set_background(image_url):
+        st.markdown(f"""
+            <style>
+            .stApp {{
+                    background-image: url({image_url});
+                    background-attachment: fixed;
+                    background-size: cover;
+                }}
+            </style>
+        """, unsafe_allow_html=True)
+
+    # Call set_background() with the correct image URL
+    set_background('background.png')
+
+    # Initialize session state for login status
+    if 'logged_in' not in st.session_state:
+        st.session_state['logged_in'] = False
+
+    # Load credentials
+    with open('credentials.yaml') as file:
+        config = yaml.load(file, Loader=SafeLoader)
+        authenticator = stauth.Authenticate(
+            config['credentials'],
+            config['cookie']['name'],
+            config['cookie']['key'],
+            config['cookie']['expiry_days'],
+            config['preauthorized']
+        )
+
+    # Login form
+    name, authentication_status, username = authenticator.login('Login', 'main')
+
+    if authentication_status:
+        authenticator.logout('Logout', 'main')
+        st.write(f'Welcome *{name}*!')
+        st.session_state['logged_in'] = True
+        st.title('Some content')
+    elif authentication_status is False:
+        st.error('Username/password is incorrect')
+    elif authentication_status is None:
+        st.warning('Please enter your username and password')
+
+    # Google login button (optional, for illustration)
+    st.markdown("""
+        <a target="_self" href="https://eox.at">
+            <button>
+                Please login via Google
+            </button>
+        </a>
+        """,
+        unsafe_allow_html=True
+    )
+
+def username_taken(username, users):
+    return username.lower() in users
+
+# Function to check if the email is taken
+def email_taken(email, users):
+    return email.lower() in [user.get('email', '').lower() for user in users.values()]
+
+# Function to display the join now page
+def joinnow():
+    with open('data.yaml') as file:
+        config = yaml.load(file, Loader=SafeLoader)
+    
+    users = config['credentials']['usernames']
+    authenticator = stauth.Authenticate(
+        config['credentials'],
+        config['cookie']['name'],
+        config['cookie']['key'],
+        config['cookie']['expiry_days'],
+        config['preauthorized']
+    )
+
+    registration_username = st.text_input('Username:')
+    registration_email = st.text_input('Email:')
+    registration_name = st.text_input('Name:')
+    registration_password = st.text_input('Password:', type='password')
+    registration_button = st.button('Register')
+
+    if registration_button:
+        if username_taken(registration_username, users):
+            st.error('Username is already taken. Please choose a different one.')
+        elif email_taken(registration_email, users):
+            st.error('Email is already taken. Please choose a different one.')
+        else:
+            hashed_password = stauth.Hasher([registration_password]).generate()
+            new_user = {
+                'email': registration_email,
+                'name': registration_name,
+                'password': hashed_password[0]
+            }
+            users[registration_username.lower()] = new_user
+
+            with open('data.yaml', 'w') as file:
+                yaml.dump(config, file, default_flow_style=False)
+
+            st.success('User registered successfully')
+
+def output():
+    pass
+
+def navbar():
+    col1, col2, col3, col4, col5 = st.columns([4, 1, 1, 1, 1])
+    with col1:
+        st.markdown("""
+            <h1 style='font-size: 36px; font-weight: bold;'>MPaint</h1>
+            """, unsafe_allow_html=True)
+    with col2:
+        if st.button('Home'):
+            st.session_state['page'] = 'landing'
+    with col3:
+        if st.button('Draw'):
+            st.session_state['page'] = 'draw'
+    with col4:
+        if st.button('Join'):
+            st.session_state['page'] = 'join'
+    with col5:
+        if st.button('Login'):
+            st.session_state['page'] = 'login'
+
 def main():
     if 'page' not in st.session_state:
-        st.session_state['page'] = 'Home'
+        st.session_state['page'] = 'landing'
 
-    if st.session_state['page'] == 'Home':
+    # navbar on top poggies
+    navbar()
+
+    # render pages using session states
+    if st.session_state['page'] == 'landing':
         show_landing_page()
-    elif st.session_state['page'] == 'Draw Away!':
-        full_app()  # You need to define this function
+    elif st.session_state['page'] == 'draw':
+        full_app()
+    elif st.session_state['page'] == 'login':
+        logging()
+    elif st.session_state['page'] == 'join':
+        joinnow()
+    elif st.session_state['page'] == 'output':
+        output()
     # elif st.session_state['page'] == 'Output Page':
     #     show_sign_in_page()  # You need to define this function
 
@@ -101,4 +237,5 @@ def main():
     # PAGES[page]()
 
 if __name__ == "__main__":
+    st.set_page_config(page_title="Streamlit Drawable Canvas", page_icon=":pencil2:")
     main()

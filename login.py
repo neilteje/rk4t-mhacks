@@ -2,7 +2,6 @@ import streamlit as st
 import streamlit_authenticator as stauth
 import yaml
 from yaml.loader import SafeLoader
-import base64
 
 st.set_page_config(page_title="Please Login", layout="centered", initial_sidebar_state="collapsed")
 st.write("# Welcome!")

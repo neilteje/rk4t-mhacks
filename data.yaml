@@ -1,0 +1,20 @@
+credentials:
+  usernames:
+    alice:
+      name: Alice Smith
+      email: alice@example.com
+      password: hashed_password
+    bob:
+      name: Bob Johnson
+      email: bob@example.com
+      password: hashed_password
+
+cookie:
+  name: some_cookie_name
+  key: some_secret_key
+  expiry_days: 30
+
+preauthorized:
+  users:
+    - alice
+    - bob
